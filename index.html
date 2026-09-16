@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a1a1a" />
+  <title>政治态度倾向量表 · PAT-40</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- 引导页 -->
+    <section id="screen-intro" class="screen active">
+      <div class="panel intro-panel">
+        <p class="eyebrow">PAT-40 · 自我觉察工具</p>
+        <h1>政治态度倾向量表</h1>
+        <p class="lead">
+          本量表测量你在国家立场、外部评价、双重标准与认知方式上的稳定倾向。
+          「小粉红」与「崇洋媚外」并非非此即彼，而是两条可以分别测量的轴。
+        </p>
+
+        <div class="info-grid">
+          <div class="info-card">
+            <span class="info-num">40</span>
+            <span class="info-label">道题</span>
+          </div>
+          <div class="info-card">
+            <span class="info-num">8</span>
+            <span class="info-label">个维度</span>
+          </div>
+          <div class="info-card">
+            <span class="info-num">4</span>
+            <span class="info-label">项指数</span>
+          </div>
+          <div class="info-card">
+            <span class="info-num">~8</span>
+            <span class="info-label">分钟</span>
+          </div>
+        </div>
+
+        <div class="intro-notes">
+          <p><strong>作答说明</strong></p>
+          <ul>
+            <li>每题从「非常不同意」到「非常同意」共 5 档，请选最接近真实想法的一项</li>
+            <li>没有正确答案，请按真实感受作答，结果越可靠</li>
+            <li>结果仅用于自我觉察，不会上传、不会记录身份</li>
+          </ul>
+        </div>
+
+        <button id="btn-start" class="btn-primary" type="button">开始作答</button>
+        <p class="footnote">测量倾向，而不是审判人。结果可作为反思起点，不是攻击他人的工具。</p>
+      </div>
+    </section>
+
+    <!-- 作答页 -->
+    <section id="screen-survey" class="screen">
+      <header class="survey-header">
+        <div class="progress-wrap">
+          <div class="progress-meta">
+            <span id="progress-text">1 / 40</span>
+            <span id="progress-pct">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+        </div>
+      </header>
+
+      <main class="survey-main">
+        <div id="question-card" class="question-card">
+          <div class="dim-tag" id="dim-tag">维度</div>
+          <p class="q-text" id="q-text"></p>
+          <div class="likert" id="likert" role="radiogroup" aria-labelledby="q-text"></div>
+        </div>
+      </main>
+
+      <footer class="survey-footer">
+        <button id="btn-prev" class="btn-ghost" type="button" disabled>上一题</button>
+        <button id="btn-next" class="btn-primary" type="button" disabled>下一题</button>
+      </footer>
+    </section>
+
+    <!-- 结果页 -->
+    <section id="screen-result" class="screen">
+      <div class="panel result-panel">
+        <p class="eyebrow">测量完成</p>
+        <h1>你的倾向画像</h1>
+        <p class="lead" id="result-type-lead"></p>
+
+        <div class="type-badge" id="type-badge"></div>
+
+        <div class="result-grid">
+          <div class="radar-block">
+            <h2 class="section-title">八维雷达图</h2>
+            <div class="radar-wrap">
+              <svg id="radar-chart" viewBox="0 0 320 320" role="img" aria-label="八维雷达图"></svg>
+            </div>
+            <div class="radar-legend" id="radar-legend"></div>
+          </div>
+
+          <div class="score-block">
+            <h2 class="section-title">总指数</h2>
+            <div class="index-cards" id="index-cards"></div>
+
+            <h2 class="section-title">维度明细</h2>
+            <div class="dim-list" id="dim-list"></div>
+          </div>
+        </div>
+
+        <div class="interpret" id="interpret"></div>
+
+        <div class="result-actions">
+          <button id="btn-copy" class="btn-secondary" type="button">复制结果摘要</button>
+          <button id="btn-restart" class="btn-ghost" type="button">重新作答</button>
+        </div>
+
+        <p class="footnote">
+          本工具为研究/自我觉察设计稿，未做全国常模。高分不等于错误，低分也不等于清醒——它测量的是稳定的态度结构，而不是对错。
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

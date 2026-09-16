@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#1a1a1a" />
+<title>政治态度倾向量表 · PAT-40</title>
+<style>
+:root {
+  --bg: #f4f2ee; --bg-deep: #ebe7e0; --surface: #fff; --ink: #1c1c1c; --ink-2: #4a4a4a; --ink-3: #7a7a7a;
+  --line: #e2ddd4; --accent: #1f5c4d; --accent-soft: #e6f0ed; --accent-2: #c45c26;
+  --shadow: 0 8px 30px rgba(28,28,28,.06); --radius: 16px; --radius-sm: 12px;
+  --font: "PingFang SC","Microsoft YaHei","Noto Sans SC","Helvetica Neue",Arial,sans-serif;
+  --mono: "SF Mono","Cascadia Code",Consolas,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;min-height:100%;font-family:var(--font);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+body{min-height:100dvh}
+#app{min-height:100dvh}
+.screen{display:none;min-height:100dvh;padding:24px 16px 40px}
+.screen.active{display:flex;flex-direction:column;align-items:center}
+.panel{width:100%;max-width:720px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px 22px 24px}
+.eyebrow{margin:0 0 10px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.intro-panel h1,.result-panel h1{margin:0 0 12px;font-size:clamp(26px,5vw,34px);line-height:1.25;letter-spacing:-.02em}
+.lead{margin:0 0 22px;color:var(--ink-2);font-size:15px;line-height:1.7}
+.info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
+.info-card{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px 8px;text-align:center;display:flex;flex-direction:column;gap:4px}
+.info-num{font-size:22px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.info-label{font-size:12px;color:var(--ink-3)}
+.intro-notes{background:var(--accent-soft);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:24px;color:var(--ink-2);font-size:14px;line-height:1.65}
+.intro-notes p{margin:0 0 8px;color:var(--ink)}
+.intro-notes ul{margin:0;padding-left:18px}
+.intro-notes li+li{margin-top:4px}
+.footnote{margin:18px 0 0;font-size:12px;color:var(--ink-3);line-height:1.6;text-align:center}
+.btn-primary,.btn-secondary,.btn-ghost{appearance:none;border:none;font-family:inherit;font-size:15px;font-weight:600;border-radius:999px;cursor:pointer;transition:transform .12s ease,background .15s ease,opacity .15s ease,border-color .15s ease;min-height:48px;padding:0 22px}
+.btn-primary:active,.btn-secondary:active,.btn-ghost:active{transform:scale(.98)}
+.btn-primary{background:var(--ink);color:#fff;width:100%}
+.btn-primary:hover:not(:disabled){background:#000}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed}
+.btn-secondary{background:var(--accent-soft);color:var(--accent);border:1px solid #c5d9d3}
+.btn-secondary:hover{background:#d7e8e3}
+.btn-ghost{background:transparent;color:var(--ink-2);border:1px solid var(--line)}
+.btn-ghost:hover:not(:disabled){border-color:var(--ink-3);color:var(--ink)}
+.btn-ghost:disabled{opacity:.35;cursor:not-allowed}
+#btn-start{max-width:280px;margin:0 auto;display:block}
+#screen-survey{padding:0;justify-content:flex-start;min-height:100dvh;background:var(--bg)}
+.survey-header{width:100%;position:sticky;top:0;z-index:10;background:rgba(244,242,238,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 16px 12px}
+.progress-wrap{max-width:720px;margin:0 auto}
+.progress-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-3);margin-bottom:8px;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.progress-bar{height:4px;background:var(--bg-deep);border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:var(--accent);border-radius:999px;transition:width .25s ease}
+.survey-main{flex:1;width:100%;max-width:720px;margin:0 auto;padding:24px 16px 120px;display:flex;align-items:flex-start}
+.question-card{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px 20px 20px;animation:fadeUp .28s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.dim-tag{display:inline-block;font-size:11px;letter-spacing:.06em;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:4px 10px;margin-bottom:14px;font-weight:600}
+.q-text{margin:0 0 22px;font-size:clamp(17px,2.8vw,20px);line-height:1.65;font-weight:500;color:var(--ink)}
+.likert{display:grid;grid-template-columns:1fr;gap:10px}
+.likert-option{appearance:none;width:100%;min-height:52px;border:1.5px solid var(--line);background:var(--bg);border-radius:var(--radius-sm);font-family:inherit;font-size:15px;color:var(--ink-2);cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 14px;text-align:left;transition:border-color .15s ease,background .15s ease,color .15s ease,transform .1s ease}
+.likert-option:hover{border-color:#b8cfc8;background:#f7faf9}
+.likert-option:active{transform:scale(.99)}
+.likert-option .dot{width:18px;height:18px;border-radius:50%;border:2px solid #b8b4ac;flex-shrink:0;position:relative;transition:border-color .15s ease,background .15s ease}
+.likert-option .dot::after{content:"";position:absolute;inset:3px;border-radius:50%;background:transparent;transition:background .15s ease}
+.likert-option.selected{border-color:var(--accent);background:var(--accent-soft);color:var(--ink);font-weight:600}
+.likert-option.selected .dot{border-color:var(--accent)}
+.likert-option.selected .dot::after{background:var(--accent)}
+.likert-option .num{font-family:var(--mono);font-size:12px;color:var(--ink-3);min-width:14px}
+.likert-option.selected .num{color:var(--accent)}
+.survey-footer{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:rgba(244,242,238,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+.survey-footer .btn-ghost{flex:0 0 auto;min-width:96px}
+.survey-footer .btn-primary{flex:1;width:auto}
+.type-badge{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;border-radius:999px;padding:10px 18px;font-size:15px;font-weight:600;margin-bottom:24px}
+.type-badge .code{font-family:var(--mono);font-size:12px;opacity:.7}
+.section-title{margin:0 0 12px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.result-grid{display:grid;gap:28px;margin-bottom:8px}
+.radar-wrap{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-sm);padding:12px;display:flex;justify-content:center}
+#radar-chart{width:100%;max-width:300px;height:auto;display:block}
+.radar-legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:12px;font-size:12px;color:var(--ink-2)}
+.radar-legend span{display:inline-flex;align-items:center;gap:6px}
+.radar-legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.index-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px}
+.index-card{background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px}
+.index-card .label{display:block;font-size:12px;color:var(--ink-3);margin-bottom:6px}
+.index-card .value{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;margin-bottom:6px}
+.index-card .bar{height:6px;background:var(--bg-deep);border-radius:999px;overflow:hidden}
+.index-card .bar>i{display:block;height:100%;border-radius:999px;width:0;transition:width .6s ease}
+.index-card.n .value{color:var(--accent-2)}.index-card.n .bar>i{background:var(--accent-2)}
+.index-card.w .value{color:#2563eb}.index-card.w .bar>i{background:#2563eb}
+.index-card.b .value{color:#7c3aed}.index-card.b .bar>i{background:#7c3aed}
+.index-card.e .value{color:#0f766e}.index-card.e .bar>i{background:#0f766e}
+.dim-list{display:flex;flex-direction:column;gap:10px}
+.dim-row{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;padding:12px 14px;background:var(--bg);border:1px solid var(--line);border-radius:var(--radius-sm)}
+.dim-row .name{font-size:14px;font-weight:500;color:var(--ink)}
+.dim-row .score{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.dim-row .track{grid-column:1/-1;height:6px;background:var(--bg-deep);border-radius:999px;overflow:hidden}
+.dim-row .track>i{display:block;height:100%;border-radius:999px;background:var(--accent);width:0;transition:width .6s ease}
+.interpret{margin:24px 0;padding:18px 16px;background:var(--accent-soft);border-radius:var(--radius-sm);font-size:14px;line-height:1.75;color:var(--ink-2)}
+.interpret h3{margin:0 0 10px;font-size:15px;color:var(--ink)}
+.interpret p{margin:0 0 10px}
+.interpret p:last-child{margin-bottom:0}
+.result-actions{display:flex;gap:10px;margin-bottom:8px}
+.result-actions button{flex:1}
+@media (min-width:720px){
+  .screen{padding:40px 24px 48px}.panel{padding:40px 36px 32px}.survey-main{padding-top:36px}
+  .question-card{padding:36px 32px 28px}.likert{grid-template-columns:1fr;gap:12px}
+  .result-grid{grid-template-columns:1fr 1fr;align-items:start}
+  .survey-footer{padding:14px 24px;justify-content:center}
+  .survey-footer .btn-primary,.survey-footer .btn-ghost{max-width:200px}
+  .survey-footer .btn-primary{max-width:240px}
+}
+@media (max-width:480px){.info-grid{grid-template-columns:repeat(2,1fr)}.index-cards{grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <section id="screen-intro" class="screen active">
+    <div class="panel intro-panel">
+      <p class="eyebrow">PAT-40 · 自我觉察工具</p>
+      <h1>政治态度倾向量表</h1>
+      <p class="lead">本量表测量你在国家立场、外部评价、双重标准与认知方式上的稳定倾向。「小粉红」与「崇洋媚外」并非非此即彼，而是两条可以分别测量的轴。</p>
+      <div class="info-grid">
+        <div class="info-card"><span class="info-num">40</span><span class="info-label">道题</span></div>
+        <div class="info-card"><span class="info-num">8</span><span class="info-label">个维度</span></div>
+        <div class="info-card"><span class="info-num">4</span><span class="info-label">项指数</span></div>
+        <div class="info-card"><span class="info-num">~8</span><span class="info-label">分钟</span></div>
+      </div>
+      <div class="intro-notes">
+        <p><strong>作答说明</strong></p>
+        <ul>
+          <li>每题从「非常不同意」到「非常同意」共 5 档，请选最接近真实想法的一项</li>
+          <li>没有正确答案，请按真实感受作答，结果越可靠</li>
+          <li>结果仅用于自我觉察，不会上传、不会记录身份</li>
+        </ul>
+      </div>
+      <button id="btn-start" class="btn-primary" type="button">开始作答</button>
+      <p class="footnote">测量倾向，而不是审判人。结果可作为反思起点，不是攻击他人的工具。</p>
+    </div>
+  </section>
+  <section id="screen-survey" class="screen">
+    <header class="survey-header">
+      <div class="progress-wrap">
+        <div class="progress-meta"><span id="progress-text">1 / 40</span><span id="progress-pct">0%</span></div>
+        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+      </div>
+    </header>
+    <main class="survey-main">
+      <div id="question-card" class="question-card">
+        <div class="dim-tag" id="dim-tag">维度</div>
+        <p class="q-text" id="q-text"></p>
+        <div class="likert" id="likert" role="radiogroup" aria-labelledby="q-text"></div>
+      </div>
+    </main>
+    <footer class="survey-footer">
+      <button id="btn-prev" class="btn-ghost" type="button" disabled>上一题</button>
+      <button id="btn-next" class="btn-primary" type="button" disabled>下一题</button>
+    </footer>
+  </section>
+  <section id="screen-result" class="screen">
+    <div class="panel result-panel">
+      <p class="eyebrow">测量完成</p>
+      <h1>你的倾向画像</h1>
+      <p class="lead" id="result-type-lead"></p>
+      <div class="type-badge" id="type-badge"></div>
+      <div class="result-grid">
+        <div class="radar-block">
+          <h2 class="section-title">八维雷达图</h2>
+          <div class="radar-wrap"><svg id="radar-chart" viewBox="0 0 320 320" role="img" aria-label="八维雷达图"></svg></div>
+          <div class="radar-legend" id="radar-legend"></div>
+        </div>
+        <div class="score-block">
+          <h2 class="section-title">总指数</h2>
+          <div class="index-cards" id="index-cards"></div>
+          <h2 class="section-title">维度明细</h2>
+          <div class="dim-list" id="dim-list"></div>
+        </div>
+      </div>
+      <div class="interpret" id="interpret"></div>
+      <div class="result-actions">
+        <button id="btn-copy" class="btn-secondary" type="button">复制结果摘要</button>
+        <button id="btn-restart" class="btn-ghost" type="button">重新作答</button>
+      </div>
+      <p class="footnote">本工具为研究/自我觉察设计稿，未做全国常模。高分不等于错误，低分也不等于清醒——它测量的是稳定的态度结构，而不是对错。</p>
+    </div>
+  </section>
+</div>
+<script>
+const LIKERT=[{v:1,label:"非常不同意"},{v:2,label:"比较不同意"},{v:3,label:"不好说"},{v:4,label:"比较同意"},{v:5,label:"非常同意"}];
+const DIMS=[{id:"D1",name:"国家形象防御",side:"N"},{id:"D2",name:"对外群体敌意",side:"N"},{id:"D3",name:"批评者排斥",side:"N"},{id:"D4",name:"体制绝对化认同",side:"N"},{id:"D5",name:"文化自卑与逆向民族",side:"W"},{id:"D6",name:"外部制度理想化",side:"W"},{id:"D7",name:"归因双重标准",side:"B"},{id:"D8",name:"认知僵化与阴谋论",side:"E"}];
+const QUESTIONS=[
+{id:1,dim:"D1",text:"当外国媒体批评中国的人权状况时，我的第一反应是「他们又在抹黑我们」，而不是先核对事实。"},
+{id:2,dim:"D1",text:"涉及国家形象时，即使自己有不同看法，我也倾向在公开场合保持一致立场。"},
+{id:3,dim:"D1",text:"看到中国人或中国企业在海外取得成绩，我会明显感到与有荣焉。"},
+{id:4,dim:"D1",text:"中国在国际评比中排名靠后时，我更相信是标准有偏见，而不是我们有短板。"},
+{id:5,dim:"D1",text:"同样是中国的问题，外国人批评比中国人批评更让我反感。"},
+{id:6,dim:"D2",text:"对部分不友好的国家，我认为不必区分其政府与民间，整体上都不可信。"},
+{id:7,dim:"D2",text:"面对双边摩擦，我认为对方大多数人本质上就是不希望中国好。"},
+{id:8,dim:"D2",text:"外国普通人对中国的负面印象，主要来自对方政府和媒体的洗脑。"},
+{id:9,dim:"D2",text:"我支持用抵制外国货/文化产品的方式，回应对方国家的政治挑衅。"},
+{id:10,dim:"D2",text:"一个外国人做出不友好言行时，我会合理地把印象扩大到其国家的大多数人。"},
+{id:11,dim:"D3",text:"在国内公开批评政策的人，往往不是建设性意见，而是发泄或带节奏。"},
+{id:12,dim:"D3",text:"一个人如果长期只讲中国的问题、不讲成绩，我会怀疑他的动机。"},
+{id:13,dim:"D3",text:"涉及敏感议题时，我认为「团结对外」比「内部辩论」更重要。"},
+{id:14,dim:"D3",text:"把家人或资产放在国外的批评者，没有资格谈中国问题。"},
+{id:15,dim:"D3",text:"如果有人指出某项政策的负面效果，我会更怀疑他是不是拿了境外的钱。",reverse:true},
+{id:16,dim:"D4",text:"中国的发展道路具有普遍借鉴意义，其他发展中国家应当优先学习中国经验。"},
+{id:17,dim:"D4",text:"与多数西方国家相比，中国现行体制在大多数领域更有效率、更符合国情。"},
+{id:18,dim:"D4",text:"社会上出现的负面事件，更多是执行问题，而不是制度设计问题。"},
+{id:19,dim:"D4",text:"西方式多党竞选不适合中国，讨论「要不要」意义不大，关键是用好现有体制。"},
+{id:20,dim:"D4",text:"当前中国在大多数领域的进步速度，明显快于同等人均收入的其他国家。"},
+{id:21,dim:"D5",text:"和许多国家的人相比，中国人在公共场合的规则意识、边界感明显更差。"},
+{id:22,dim:"D5",text:"中国很多社会问题的根源，可以追溯到某种深入骨髓的「国民性」。"},
+{id:23,dim:"D5",text:"在审美、生活方式、公共礼仪等方面，发达国家的整体水准仍明显高于中国。"},
+{id:24,dim:"D5",text:"中国原创的文化产品总体上缺乏世界一流的想象力。"},
+{id:25,dim:"D5",text:"如果长期生活，我会明显更倾向选一个西方发达国家而不是中国一线城市。",reverse:true},
+{id:26,dim:"D6",text:"发达国家的法治和社会信任水平，是中国未来几十年难以达到的。"},
+{id:27,dim:"D6",text:"欧美在处理言论自由、公民权利上的做法，整体上比中国更接近「正确答案」。"},
+{id:28,dim:"D6",text:"中国教育/科研/医疗对标北欧或日本，差距是系统性的、难以靠努力弥补的。"},
+{id:29,dim:"D6",text:"外国企业、外国学术机构提供的东西，平均而言质量更高、更值得信赖。"},
+{id:30,dim:"D6",text:"中国做得好往往是「特殊国情」的结果；外国做得好才是可复制的「正常状态」。",reverse:true},
+{id:31,dim:"D7",text:"同样问题发生在中国我会更严厉批评；发生在国外我会更多找客观原因。"},
+{id:32,dim:"D7",text:"中国出现负面新闻我倾向于先问责；国外同样新闻我倾向于先同情当事方。",reverse:true},
+{id:33,dim:"D7",text:"中国领先时我强调短期红利；外国领先时我强调长期实力。"},
+{id:34,dim:"D7",text:"我发现自己对中外同类事件的情绪反应强度，经常差别很大。"},
+{id:35,dim:"D7",text:"对欣赏的国家我主动找它好的证据；对反感的国家我主动找它差的证据。"},
+{id:36,dim:"D8",text:"涉及国际博弈时，公开理由大多不是真实动机，背后一定另有隐情。"},
+{id:37,dim:"D8",text:"复杂的社会现象，通常可以用一两条简单原则解释清楚。"},
+{id:38,dim:"D8",text:"和立场不同的人争论时，我更常觉得对方「要么蠢要么坏」，而不是「有道理但不完整」。"},
+{id:39,dim:"D8",text:"我愿意承认：我长期持有的某个政治判断，可能因为新证据而被推翻。",reverse:true},
+{id:40,dim:"D8",text:"大多数「中立」「客观」的表述，其实都是某种立场的伪装。"}
+];
+const DIM_META=Object.fromEntries(DIMS.map(d=>[d.id,d]));
+const state={index:0,answers:Array(QUESTIONS.length).fill(null)};
+const $=s=>document.querySelector(s);
+const screens={intro:$("#screen-intro"),survey:$("#screen-survey"),result:$("#screen-result")};
+function showScreen(n){Object.values(screens).forEach(s=>s.classList.remove("active"));screens[n].classList.add("active");window.scrollTo(0,0)}
+function renderQuestion(){
+  const q=QUESTIONS[state.index],dim=DIM_META[q.dim],total=QUESTIONS.length;
+  const answered=state.answers.filter(a=>a!==null).length;
+  const pct=Math.round(answered/total*100);
+  $("#progress-text").textContent=`${state.index+1} / ${total}`;
+  $("#progress-pct").textContent=`${pct}%`;
+  $("#progress-fill").style.width=`${pct}%`;
+  $("#dim-tag").textContent=`${dim.id} · ${dim.name}`;
+  $("#q-text").textContent=q.text;
+  const likert=$("#likert");likert.innerHTML="";
+  LIKERT.forEach(opt=>{
+    const btn=document.createElement("button");
+    btn.type="button";
+    btn.className="likert-option"+(state.answers[state.index]===opt.v?" selected":"");
+    btn.setAttribute("role","radio");
+    btn.setAttribute("aria-checked",state.answers[state.index]===opt.v?"true":"false");
+    btn.innerHTML=`<span class="dot" aria-hidden="true"></span><span class="num">${opt.v}</span><span class="txt">${opt.label}</span>`;
+    btn.addEventListener("click",()=>selectAnswer(opt.v));
+    likert.appendChild(btn);
+  });
+  $("#btn-prev").disabled=state.index===0;
+  const has=state.answers[state.index]!==null;
+  $("#btn-next").disabled=!has;
+  $("#btn-next").textContent=state.index===total-1?"查看结果":"下一题";
+  const card=$("#question-card");card.style.animation="none";void card.offsetWidth;card.style.animation="";
+}
+function selectAnswer(value){
+  state.answers[state.index]=value;renderQuestion();
+  if(state.index<QUESTIONS.length-1){setTimeout(()=>{if(state.answers[state.index]===value){state.index+=1;renderQuestion()}},220)}
+}
+function goPrev(){if(state.index>0){state.index-=1;renderQuestion()}}
+function goNext(){
+  if(state.answers[state.index]===null)return;
+  if(state.index<QUESTIONS.length-1){state.index+=1;renderQuestion()}else finish();
+}
+function finish(){
+  if(state.answers.some(a=>a===null)){state.index=state.answers.findIndex(a=>a===null);renderQuestion();return}
+  const result=computeResult();renderResult(result);showScreen("result");
+}
+function scoreItem(raw,reverse){return reverse?6-raw:raw}
+function computeResult(){
+  const dimScores={};
+  DIMS.forEach(d=>{
+    const items=QUESTIONS.filter(q=>q.dim===d.id);
+    const vals=items.map(q=>scoreItem(state.answers[q.id-1],!!q.reverse));
+    dimScores[d.id]=round1(vals.reduce((a,b)=>a+b,0)/vals.length);
+  });
+  const mean=ids=>round1(ids.reduce((s,id)=>s+dimScores[id],0)/ids.length);
+  const N=mean(["D1","D2","D3","D4"]),W=mean(["D5","D6"]),B=dimScores.D7,E=dimScores.D8;
+  return {dimScores,N,W,B,E,type:classify(N,W,B,E)};
+}
+function round1(n){return Math.round(n*10)/10}
+function classify(N,W,B,E){
+  const nHigh=N>3.5,nMid=N>=2.8&&N<=3.5,nLow=N<2.8;
+  const wHigh=W>3.5,wMid=W>=2.8&&W<=3.5,wLow=W<2.8;
+  let code,name,brief;
+  if(nHigh&&wLow){code="A";name="国家主义绝对化";brief="国家立场防御性强，对外评价低，接近舆论场所说的「小粉红」画像。"}
+  else if(nLow&&wHigh){code="B";name="逆向民族主义";brief="对外部制度与文化评价高，对国内问题归因更苛刻，接近「崇洋媚外」画像。"}
+  else if(nHigh&&wHigh){code="C";name="双向高 · 立场摇摆";brief="国家崇拜与外部理想化同时偏高，标准不统一，双标指数通常也偏高。"}
+  else if(nMid&&wMid){code="D";name="理性中间型";brief="两个极端倾向都不高，更接近就事论事、对中外大体同一套标准。"}
+  else if(nHigh&&wMid){code="A′";name="偏国家主义";brief="国家立场防御性偏高，但尚未极端；对外评价处于中间带。"}
+  else if(nMid&&wHigh){code="W′";name="偏外部理想化";brief="对外部评价偏高，国家立场防御性处于中间带。"}
+  else if(nMid&&wLow){code="A″";name="温和偏国内立场";brief="整体更认同国内叙事，但防御性未到极端水平。"}
+  else if(nLow&&wMid){code="B′";name="偏外部立场";brief="更倾向外部叙事，但尚未形成系统的逆向民族倾向。"}
+  else{code="D′";name="低双极 · 清醒观察型";brief="两边极端倾向都低，通常更少情绪化、更少绝对化判断。"}
+  const extras=[];
+  if(B>=3.6)extras.push("双重标准倾向较高：对中外同类事件使用不同尺子的概率大。");
+  else if(B<=2.4)extras.push("双重标准倾向较低：对中外事件大致一视同仁。");
+  if(E>=3.6)extras.push("认知僵化/阴谋论倾向较高：更依赖简单叙事，更难被证据改变。");
+  else if(E<=2.4)extras.push("认知开放度较好：更可能承认复杂性，也更愿意被证据说服。");
+  return {code,name,brief,extras};
+}
+function renderResult(result){
+  const {dimScores,N,W,B,E,type}=result;
+  $("#result-type-lead").textContent="以下结果基于你在 40 题上的作答。两个主指数并非互斥，交叉后得到整体画像。";
+  $("#type-badge").innerHTML=`<span class="code">${type.code}</span><span>${type.name}</span>`;
+  const cards=[
+    {key:"n",label:"N · 国家主义倾向",value:N},
+    {key:"w",label:"W · 崇外倾向",value:W},
+    {key:"b",label:"B · 双重标准",value:B},
+    {key:"e",label:"E · 极端化思维",value:E}
+  ];
+  $("#index-cards").innerHTML=cards.map(c=>{
+    const pct=Math.max(0,Math.min(100,((c.value-1)/4)*100));
+    return `<div class="index-card ${c.key}"><span class="label">${c.label}</span><div class="value">${c.value.toFixed(1)}</div><div class="bar"><i data-w="${pct}"></i></div></div>`;
+  }).join("");
+  $("#dim-list").innerHTML=DIMS.map(d=>{
+    const v=dimScores[d.id],pct=((v-1)/4)*100;
+    return `<div class="dim-row"><span class="name">${d.id} · ${d.name}</span><span class="score">${v.toFixed(1)}</span><div class="track"><i data-w="${pct}"></i></div></div>`;
+  }).join("");
+  requestAnimationFrame(()=>{
+    document.querySelectorAll(".index-card .bar > i, .dim-row .track > i").forEach(el=>{el.style.width=`${el.dataset.w}%`});
+  });
+  drawRadar(dimScores);
+  const extrasHtml=type.extras.length?`<p><strong>附加信号</strong><br />${type.extras.join("<br />")}</p>`:"";
+  $("#interpret").innerHTML=`<h3>结果解读</h3>
+    <p><strong>${type.code} · ${type.name}</strong> — ${type.brief}</p>
+    <p>N（国家主义）=${N.toFixed(1)} · W（崇外）=${W.toFixed(1)} · B（双标）=${B.toFixed(1)} · E（极端化）=${E.toFixed(1)}。以 3.0 为中点，&gt;3.5 视为偏高，&lt;2.8 视为偏低。</p>
+    ${extrasHtml}
+    <p style="color:var(--ink-3);font-size:13px;">提醒：分数反映的是态度结构，不是人品或智商。高分人群也可能在具体议题上判断正确，低分人群也可能判断失误。更有价值的用法是：对照自己的高分维度，检查是否存在可被证据推翻的绝对化信念。</p>`;
+  $("#radar-legend").innerHTML=DIMS.map(d=>`<span><i style="background:${colorForSide(d.side)}"></i>${d.id} ${d.name} ${dimScores[d.id].toFixed(1)}</span>`).join("");
+  window.__patResult=result;
+}
+function colorForSide(side){return {N:"#c45c26",W:"#2563eb",B:"#7c3aed",E:"#0f766e"}[side]||"#1f5c4d"}
+function drawRadar(dimScores){
+  const svg=$("#radar-chart"),size=320,cx=size/2,cy=size/2,maxR=110,levels=5,n=DIMS.length;
+  const angleAt=i=>-Math.PI/2+(i*2*Math.PI)/n;
+  const pointAt=(i,r)=>{const a=angleAt(i);return [cx+r*Math.cos(a),cy+r*Math.sin(a)]};
+  const valueToR=v=>((v-1)/4)*maxR;
+  let g="";
+  for(let lv=1;lv<=levels;lv++){const r=maxR*lv/levels;const pts=Array.from({length:n},(_,i)=>pointAt(i,r).join(",")).join(" ");g+=`<polygon points="${pts}" fill="none" stroke="#e2ddd4" stroke-width="1" />`}
+  for(let i=0;i<n;i++){const [x,y]=pointAt(i,maxR);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#e2ddd4" stroke-width="1" />`}
+  DIMS.forEach((d,i)=>{const [x,y]=pointAt(i,maxR+22);const anchor=x<cx-4?"end":x>cx+4?"start":"middle";g+=`<text x="${x}" y="${y}" text-anchor="${anchor}" dominant-baseline="middle" font-size="11" fill="#4a4a4a" font-family="inherit">${d.id}</text>`});
+  const dataPts=DIMS.map((d,i)=>pointAt(i,valueToR(dimScores[d.id])).join(",")).join(" ");
+  g+=`<polygon points="${dataPts}" fill="rgba(31,92,77,0.18)" stroke="#1f5c4d" stroke-width="2" stroke-linejoin="round" />`;
+  DIMS.forEach((d,i)=>{const [x,y]=pointAt(i,valueToR(dimScores[d.id]));g+=`<circle cx="${x}" cy="${y}" r="3.5" fill="${colorForSide(d.side)}" stroke="#fff" stroke-width="1.5" />`});
+  svg.innerHTML=g;
+}
+function copySummary(){
+  const r=window.__patResult;if(!r)return;
+  const lines=["【PAT-40 政治态度倾向量表 · 结果】",`分型：${r.type.code} · ${r.type.name}`,r.type.brief,"",
+    `N 国家主义倾向：${r.N.toFixed(1)}`,`W 崇外倾向：${r.W.toFixed(1)}`,`B 双重标准：${r.B.toFixed(1)}`,`E 极端化思维：${r.E.toFixed(1)}`,"",
+    "八维：",...DIMS.map(d=>`  ${d.id} ${d.name}：${r.dimScores[d.id].toFixed(1)}`)];
+  if(r.type.extras.length)lines.push("",...r.type.extras);
+  const text=lines.join("\n");
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(()=>flashBtn($("#btn-copy"),"已复制"),()=>fallbackCopy(text))}else fallbackCopy(text);
+}
+function fallbackCopy(text){
+  const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.left="-9999px";
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand("copy");flashBtn($("#btn-copy"),"已复制")}catch(e){flashBtn($("#btn-copy"),"复制失败")}
+  document.body.removeChild(ta);
+}
+function flashBtn(btn,msg){const old=btn.textContent;btn.textContent=msg;setTimeout(()=>{btn.textContent=old},1600)}
+function restart(){state.index=0;state.answers=Array(QUESTIONS.length).fill(null);showScreen("intro")}
+$("#btn-start").addEventListener("click",()=>{state.index=0;renderQuestion();showScreen("survey")});
+$("#btn-prev").addEventListener("click",goPrev);
+$("#btn-next").addEventListener("click",goNext);
+$("#btn-copy").addEventListener("click",copySummary);
+$("#btn-restart").addEventListener("click",restart);
+document.addEventListener("keydown",e=>{
+  if(!screens.survey.classList.contains("active"))return;
+  if(e.key>="1"&&e.key<="5")selectAnswer(Number(e.key));
+  else if(e.key==="ArrowLeft")goPrev();
+  else if(e.key==="ArrowRight"||e.key==="Enter")goNext();
+});
+</script>
+</body>
+</html>
