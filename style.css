@@ -466,6 +466,75 @@ body {
   margin-bottom: 8px;
 }
 
+.score-block {
+  margin-bottom: 8px;
+}
+
+/* 折叠区：默认收起，防止分享时暴露维度结构 */
+.detail-fold {
+  margin: 8px 0 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.detail-fold > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.detail-fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.detail-fold > summary::after {
+  content: "";
+}
+
+.detail-fold > summary {
+  position: relative;
+  padding-right: 40px;
+}
+
+.detail-fold > summary::before {
+  content: "展开";
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.detail-fold[open] > summary::before {
+  content: "收起";
+}
+
+.summary-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.summary-hint {
+  font-size: 12px;
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+.folded-grid {
+  padding: 0 14px 16px;
+  margin: 0;
+}
+
 .radar-wrap {
   background: var(--bg);
   border: 1px solid var(--line);

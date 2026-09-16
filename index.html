@@ -89,25 +89,32 @@
 
         <div class="type-badge" id="type-badge"></div>
 
-        <div class="result-grid">
-          <div class="radar-block">
-            <h2 class="section-title">八维雷达图</h2>
-            <div class="radar-wrap">
-              <svg id="radar-chart" viewBox="0 0 320 320" role="img" aria-label="八维雷达图"></svg>
-            </div>
-            <div class="radar-legend" id="radar-legend"></div>
-          </div>
-
-          <div class="score-block">
-            <h2 class="section-title">总指数</h2>
-            <div class="index-cards" id="index-cards"></div>
-
-            <h2 class="section-title">维度明细</h2>
-            <div class="dim-list" id="dim-list"></div>
-          </div>
+        <div class="score-block">
+          <h2 class="section-title">总指数</h2>
+          <div class="index-cards" id="index-cards"></div>
         </div>
 
         <div class="interpret" id="interpret"></div>
+
+        <details class="detail-fold" id="detail-fold">
+          <summary>
+            <span class="summary-title">详细维度与雷达图</span>
+            <span class="summary-hint">默认收起，避免分享时暴露测量结构</span>
+          </summary>
+          <div class="result-grid folded-grid">
+            <div class="radar-block">
+              <h2 class="section-title">八维雷达图</h2>
+              <div class="radar-wrap">
+                <svg id="radar-chart" viewBox="0 0 320 320" role="img" aria-label="八维雷达图"></svg>
+              </div>
+              <div class="radar-legend" id="radar-legend"></div>
+            </div>
+            <div class="score-block">
+              <h2 class="section-title">维度明细</h2>
+              <div class="dim-list" id="dim-list"></div>
+            </div>
+          </div>
+        </details>
 
         <div class="result-actions">
           <button id="btn-copy" class="btn-secondary" type="button">复制结果摘要</button>
